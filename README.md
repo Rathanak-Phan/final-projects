@@ -335,6 +335,8 @@ Development will follow these phases to ensure the fundamentals are understood b
 - Create reusable ProductCard components.
 - Implement loading and error states.
 
+> TheamBunlong
+
 ### Phase 2: Search and Category
 
 - Build search input.
@@ -353,6 +355,8 @@ Development will follow these phases to ensure the fundamentals are understood b
 - Sort products by rating.
 - Combine multiple filters.
 
+> LengSokpheng
+
 ### Phase 4: Pagination
 
 - Implement limit and skip.
@@ -362,6 +366,7 @@ Development will follow these phases to ensure the fundamentals are understood b
 - Calculate total pages.
 - Reset pagination when filters change.
 
+
 ### Phase 5: Product Details
 
 - Implement React Router.
@@ -370,6 +375,8 @@ Development will follow these phases to ensure the fundamentals are understood b
 - Build image gallery.
 - Display complete product information.
 - Display related products.
+
+> Vanthorn
 
 ### Phase 6: Product CRUD
 
@@ -392,6 +399,8 @@ Development will follow these phases to ensure the fundamentals are understood b
 - Organize API services.
 - Optimize component rendering.
 - Test application functionality.
+
+> mommonychan-max
 
 ---
 
