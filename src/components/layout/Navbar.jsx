@@ -23,6 +23,9 @@ export default function Navbar() {
             <NavLink to="/products" className={linkClass}>
               Products
             </NavLink>
+            <NavLink to="/admin/products">
+  Admin
+</NavLink>
           </div>
         </div>
       </nav>

@@ -24,6 +24,8 @@ export default function Products() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const productsPerPage = 9;
 
   // Fetch available categories on mount (Module 3)
   useEffect(() => {
@@ -66,19 +68,30 @@ export default function Products() {
     fetchProductList();
   }, [fetchProductList]);
 
+
   const handleSelectCategory = (slug) => {
     setSelectedCategory(slug);
     setSearchQuery("");
     setDebouncedQuery("");
+    setPage(1);
     if (slug === "all") {
       setSearchParams({});
     } else {
       setSearchParams({ category: slug });
     }
   };
+  const totalPages = Math.ceil(products.length / productsPerPage);
+
+  const startIndex = (page - 1) * productsPerPage;
+
+  const currentProducts = products.slice(
+    startIndex,
+    startIndex + productsPerPage
+  );
 
   const handleSearchChange = (value) => {
     setSearchQuery(value);
+    setPage(1);
     if (value.trim() && selectedCategory !== "all") {
       setSelectedCategory("all");
       setSearchParams({});
@@ -87,9 +100,11 @@ export default function Products() {
 
   const handleSearchSubmit = () => {
     setDebouncedQuery(searchQuery.trim());
+    setPage(1);
   };
 
   const handleClearSearch = () => {
+    setPage(1);
     setSearchQuery("");
     setDebouncedQuery("");
   };
@@ -110,8 +125,8 @@ export default function Products() {
             {debouncedQuery
               ? `Search Results for "${debouncedQuery}"`
               : selectedCategory === "all"
-              ? "All Products"
-              : selectedCategory.replace("-", " ")}
+                ? "All Products"
+                : selectedCategory.replace("-", " ")}
           </h1>
 
           <SearchBar
@@ -168,9 +183,32 @@ export default function Products() {
               Showing <span className="font-semibold text-slate-800">{products.length}</span> products
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-              {products.map((product) => (
+              {currentProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
+            </div>
+            <div className="flex justify-between items-center mt-8 p-4 bg-white rounded-lg">
+
+              <p>Page {page} of {totalPages}</p>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage(page - 1)}
+                  disabled={page === 1}
+                  className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-40"
+                >
+                  Previous
+                </button>
+
+                <button
+                  onClick={() => setPage(page + 1)}
+                  disabled={page === totalPages}
+                  className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+
             </div>
           </>
         )}

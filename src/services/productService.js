@@ -24,3 +24,35 @@ export async function getProductsByCategory(categorySlug) {
   if (!response.ok) throw new Error("Failed to fetch category products");
   return response.json();
 }
+
+export async function addProduct(product) {
+  const response = await fetch(`${BASE_URL}/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(product),
+  });
+
+  return response.json();
+}
+
+export async function updateProduct(id, product) {
+  const response = await fetch(`${BASE_URL}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(product),
+  });
+
+  return response.json();
+}
+
+export async function deleteProduct(id) {
+  const response = await fetch(`${BASE_URL}/${id}`, {
+    method: "DELETE",
+  });
+
+  return response.json();
+}
