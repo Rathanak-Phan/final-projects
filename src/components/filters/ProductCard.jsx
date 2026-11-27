@@ -1,4 +1,5 @@
 import { FaStar, FaBoxOpen } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 export default function ProductCard({ product }) {
   const discountedPrice = (
@@ -7,7 +8,10 @@ export default function ProductCard({ product }) {
   ).toFixed(2);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col">
+    <Link
+      to={`/products/${product.id}`}
+      className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col"
+    >
       <div className="relative bg-slate-100 h-48 flex items-center justify-center p-4">
         <img
           src={product.thumbnail}
@@ -66,6 +70,6 @@ export default function ProductCard({ product }) {
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

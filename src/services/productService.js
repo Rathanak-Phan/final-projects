@@ -7,7 +7,9 @@ export async function getProducts(limit = 30, skip = 0) {
 }
 
 export async function searchProducts(query) {
-  const response = await fetch(`${BASE_URL}/search?q=${encodeURIComponent(query)}`);
+  const response = await fetch(
+    `${BASE_URL}/search?q=${encodeURIComponent(query)}`,
+  );
   if (!response.ok) throw new Error("Failed to search products");
   return response.json();
 }
@@ -20,7 +22,9 @@ export async function getCategories(limit = 4) {
 }
 
 export async function getProductsByCategory(categorySlug) {
-  const response = await fetch(`${BASE_URL}/category/${encodeURIComponent(categorySlug)}`);
+  const response = await fetch(
+    `${BASE_URL}/category/${encodeURIComponent(categorySlug)}`,
+  );
   if (!response.ok) throw new Error("Failed to fetch category products");
   return response.json();
 }
@@ -53,6 +57,15 @@ export async function deleteProduct(id) {
   const response = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE",
   });
+
+  return response.json();
+}
+export async function getProductById(id) {
+  const response = await fetch(`${BASE_URL}/${id}`);
+
+  if (!response.ok) {
+    throw new Error("Product not found");
+  }
 
   return response.json();
 }

@@ -3,6 +3,7 @@ import Navbar from "./components/layout/Navbar";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import AdminProducts from "./pages/AdminProducts";
+import ProductDetail from "./pages/ProductDetail";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
             <Route path="/admin/products" element={<AdminProducts />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
         </Routes>
       </div>
     </BrowserRouter>

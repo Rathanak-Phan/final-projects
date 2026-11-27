@@ -24,7 +24,7 @@ function AdminProducts() {
 
   //   Get products
   useEffect(() => {
-    getProducts(100, 0)
+    getProducts(30, 0)
       .then(data => {
         setProducts(data.products);
         setLoading(false);
