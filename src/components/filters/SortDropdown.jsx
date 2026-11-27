@@ -1,9 +1,16 @@
+// SortDropdown component handles product sorting options
 export default function SortDropdown({ value, onChange, onReset }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <label htmlFor="product-sort" className="text-sm font-medium text-slate-600">
+      {/* Sorting label */}
+      <label
+        htmlFor="product-sort"
+        className="text-sm font-medium text-slate-600"
+      >
         Sort by
       </label>
+
+      {/* Sorting options */}
       <select
         id="product-sort"
         value={value}
@@ -19,6 +26,8 @@ export default function SortDropdown({ value, onChange, onReset }) {
         <option value="name-desc">Name: Z-A</option>
         <option value="discount-desc">Highest Discount</option>
       </select>
+
+      {/* Show reset button only when a sorting option is selected */}
       {value !== "default" && (
         <button
           type="button"

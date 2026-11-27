@@ -13,8 +13,11 @@ export default function PriceFilter({
 }) {
   return (
     <section className="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      {/* Filter */}
       <div className="mb-4 flex items-center justify-between">
         <h2 className="font-bold text-slate-900">Product Filters</h2>
+
+        {/* Show Clear All */}
         {activeFilters.length > 0 && (
           <button
             type="button"
@@ -27,10 +30,12 @@ export default function PriceFilter({
       </div>
 
       <div className="space-y-4">
+        {/* Price filter */}
         <fieldset>
           <legend className="mb-2 text-sm font-semibold text-slate-700">
             Price range
           </legend>
+
           <div className="grid grid-cols-2 gap-2">
             <label className="text-xs text-slate-500">
               Minimum
@@ -39,12 +44,15 @@ export default function PriceFilter({
                 min="0"
                 step="0.01"
                 value={filters.minPrice}
-                onChange={(event) => onChange("minPrice", event.target.value)}
+                onChange={(event) =>
+                  onChange("minPrice", event.target.value)
+                }
                 placeholder="No min"
                 aria-label="Minimum price"
                 className={`${fieldClassName} mt-1`}
               />
             </label>
+
             <label className="text-xs text-slate-500">
               Maximum
               <input
@@ -52,7 +60,9 @@ export default function PriceFilter({
                 min="0"
                 step="0.01"
                 value={filters.maxPrice}
-                onChange={(event) => onChange("maxPrice", event.target.value)}
+                onChange={(event) =>
+                  onChange("maxPrice", event.target.value)
+                }
                 placeholder="No max"
                 aria-label="Maximum price"
                 className={`${fieldClassName} mt-1`}
@@ -61,11 +71,14 @@ export default function PriceFilter({
           </div>
         </fieldset>
 
+        {/* Minimum rating filter */}
         <label className="block text-sm font-semibold text-slate-700">
           Minimum rating
           <select
             value={filters.minRating}
-            onChange={(event) => onChange("minRating", event.target.value)}
+            onChange={(event) =>
+              onChange("minRating", event.target.value)
+            }
             className={`${fieldClassName} mt-1 font-normal`}
           >
             <option value="">Any rating</option>
@@ -76,6 +89,7 @@ export default function PriceFilter({
           </select>
         </label>
 
+        {/* Brand filter */}
         <label className="block text-sm font-semibold text-slate-700">
           Brand
           <select
@@ -84,6 +98,8 @@ export default function PriceFilter({
             className={`${fieldClassName} mt-1 font-normal`}
           >
             <option value="">All brands</option>
+
+            {/* Generate brand */}
             {brands.map((brand) => (
               <option key={brand} value={brand}>
                 {brand}
@@ -92,11 +108,14 @@ export default function PriceFilter({
           </select>
         </label>
 
+        {/* Product availability filter */}
         <label className="block text-sm font-semibold text-slate-700">
           Availability
           <select
             value={filters.availability}
-            onChange={(event) => onChange("availability", event.target.value)}
+            onChange={(event) =>
+              onChange("availability", event.target.value)
+            }
             className={`${fieldClassName} mt-1 font-normal`}
           >
             <option value="all">All products</option>
@@ -105,22 +124,27 @@ export default function PriceFilter({
           </select>
         </label>
 
+        {/* Discount filter */}
         <label className="flex items-center gap-2 text-sm text-slate-700">
           <input
             type="checkbox"
             checked={filters.discounted}
-            onChange={(event) => onChange("discounted", event.target.checked)}
+            onChange={(event) =>
+              onChange("discounted", event.target.checked)
+            }
             className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
           />
           Discounted products
         </label>
       </div>
 
+      {/* Display currently active filters */}
       {activeFilters.length > 0 && (
         <div className="mt-5 border-t border-slate-100 pt-4">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
             Active filters
           </p>
+
           <div className="flex flex-wrap gap-2">
             {activeFilters.map(({ key, label }) => (
               <button
