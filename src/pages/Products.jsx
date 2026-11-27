@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FaExclamationCircle, FaRedo, FaSearchMinus } from "react-icons/fa";
 import {
@@ -10,7 +10,18 @@ import {
 import ProductCard from "../components/filters/ProductCard";
 import SearchBar from "../components/filters/SearchBar";
 import CategoryFilter from "../components/filters/CategoryFilter";
+import PriceFilter from "../components/filters/PriceFilter";
+import SortDropdown from "../components/filters/SortDropdown";
 import Loading from "../components/layout/Loading";
+
+const initialFilters = {
+  minPrice: "",
+  maxPrice: "",
+  minRating: "",
+  brand: "",
+  availability: "all",
+  discounted: false,
+};
 
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,6 +36,8 @@ export default function Products() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState(initialFilters);
+  const [sortOrder, setSortOrder] = useState("default");
   const productsPerPage = 9;
 
   // Fetch available categories on mount (Module 3)
@@ -68,6 +81,84 @@ export default function Products() {
     fetchProductList();
   }, [fetchProductList]);
 
+  const brands = useMemo(
+    () =>
+      [...new Set(products.map((product) => product.brand).filter(Boolean))].sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [products]
+  );
+
+  const activeFilters = useMemo(() => {
+    const active = [];
+    if (filters.minPrice !== "") {
+      active.push({ key: "minPrice", label: `Min $${filters.minPrice}` });
+    }
+    if (filters.maxPrice !== "") {
+      active.push({ key: "maxPrice", label: `Max $${filters.maxPrice}` });
+    }
+    if (filters.minRating !== "") {
+      active.push({ key: "minRating", label: `${filters.minRating}+ stars` });
+    }
+    if (filters.brand) {
+      active.push({ key: "brand", label: filters.brand });
+    }
+    if (filters.availability !== "all") {
+      active.push({
+        key: "availability",
+        label: filters.availability === "in-stock" ? "In stock" : "Out of stock",
+      });
+    }
+    if (filters.discounted) {
+      active.push({ key: "discounted", label: "Discounted" });
+    }
+    return active;
+  }, [filters]);
+
+  const visibleProducts = useMemo(() => {
+    const filtered = products.filter((product) => {
+      const minPrice = filters.minPrice === "" ? null : Number(filters.minPrice);
+      const maxPrice = filters.maxPrice === "" ? null : Number(filters.maxPrice);
+      const minRating = filters.minRating === "" ? null : Number(filters.minRating);
+
+      return (
+        (minPrice === null || product.price >= minPrice) &&
+        (maxPrice === null || product.price <= maxPrice) &&
+        (minRating === null || product.rating >= minRating) &&
+        (!filters.brand || product.brand === filters.brand) &&
+        (filters.availability === "all" ||
+          (filters.availability === "in-stock"
+            ? product.stock > 0
+            : product.stock <= 0)) &&
+        (!filters.discounted || product.discountPercentage > 0)
+      );
+    });
+
+    switch (sortOrder) {
+      case "price-asc":
+        return filtered.sort((a, b) => a.price - b.price);
+      case "price-desc":
+        return filtered.sort((a, b) => b.price - a.price);
+      case "rating-desc":
+        return filtered.sort((a, b) => b.rating - a.rating);
+      case "rating-asc":
+        return filtered.sort((a, b) => a.rating - b.rating);
+      case "name-asc":
+        return filtered.sort((a, b) => a.title.localeCompare(b.title));
+      case "name-desc":
+        return filtered.sort((a, b) => b.title.localeCompare(a.title));
+      case "discount-desc":
+        return filtered.sort(
+          (a, b) => b.discountPercentage - a.discountPercentage
+        );
+      default:
+        return filtered;
+    }
+  }, [products, filters, sortOrder]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters, sortOrder, products]);
 
   const handleSelectCategory = (slug) => {
     setSelectedCategory(slug);
@@ -80,14 +171,27 @@ export default function Products() {
       setSearchParams({ category: slug });
     }
   };
-  const totalPages = Math.ceil(products.length / productsPerPage);
+  const totalPages = Math.ceil(visibleProducts.length / productsPerPage);
 
   const startIndex = (page - 1) * productsPerPage;
 
-  const currentProducts = products.slice(
+  const currentProducts = visibleProducts.slice(
     startIndex,
     startIndex + productsPerPage
   );
+
+  const handleFilterChange = (key, value) => {
+    setFilters((current) => ({ ...current, [key]: value }));
+  };
+
+  const handleRemoveFilter = (key) => {
+    const resetValue = key === "availability" ? "all" : key === "discounted" ? false : "";
+    setFilters((current) => ({ ...current, [key]: resetValue }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters(initialFilters);
+  };
 
   const handleSearchChange = (value) => {
     setSearchQuery(value);
@@ -110,13 +214,22 @@ export default function Products() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8">
-      {/* Category Sidebar & Mobile Dropdown */}
-      <CategoryFilter
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onSelectCategory={handleSelectCategory}
-      />
+    <div className="flex flex-col gap-8 lg:flex-row">
+      <aside className="w-full shrink-0 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto lg:w-64">
+        <CategoryFilter
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={handleSelectCategory}
+        />
+        <PriceFilter
+          filters={filters}
+          brands={brands}
+          activeFilters={activeFilters}
+          onChange={handleFilterChange}
+          onRemoveFilter={handleRemoveFilter}
+          onClearFilters={handleClearFilters}
+        />
+      </aside>
 
       {/* Main Content Area */}
       <div className="flex-1">
@@ -134,6 +247,21 @@ export default function Products() {
             onSearchChange={handleSearchChange}
             onSearchSubmit={handleSearchSubmit}
             onClearSearch={handleClearSearch}
+          />
+        </div>
+
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-slate-500">
+            Showing{" "}
+            <span className="font-semibold text-slate-800">
+              {visibleProducts.length}
+            </span>{" "}
+            products
+          </p>
+          <SortDropdown
+            value={sortOrder}
+            onChange={setSortOrder}
+            onReset={() => setSortOrder("default")}
           />
         </div>
 
@@ -156,32 +284,36 @@ export default function Products() {
         )}
 
         {/* Empty / No Results State */}
-        {!loading && !error && products.length === 0 && (
+        {!loading && !error && visibleProducts.length === 0 && (
           <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
             <FaSearchMinus className="text-4xl text-slate-400 mx-auto mb-3" />
             <h3 className="text-lg font-bold text-slate-800 mb-1">No Products Found</h3>
             <p className="text-sm text-slate-500 mb-4">
-              {debouncedQuery
+              {products.length > 0
+                ? "Try changing or clearing your product filters."
+                : debouncedQuery
                 ? `No items matched "${debouncedQuery}". Try a different keyword.`
                 : "There are currently no products available in this category."}
             </p>
-            {(debouncedQuery || selectedCategory !== "all") && (
+            {(activeFilters.length > 0 || debouncedQuery || selectedCategory !== "all") && (
               <button
-                onClick={() => handleSelectCategory("all")}
+                onClick={() => {
+                  handleClearFilters();
+                  if (debouncedQuery || selectedCategory !== "all") {
+                    handleSelectCategory("all");
+                  }
+                }}
                 className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition cursor-pointer"
               >
-                Reset Filters
+                Clear Filters
               </button>
             )}
           </div>
         )}
 
         {/* Product Grid */}
-        {!loading && !error && products.length > 0 && (
+        {!loading && !error && visibleProducts.length > 0 && (
           <>
-            <p className="text-sm text-slate-500 mb-4">
-              Showing <span className="font-semibold text-slate-800">{products.length}</span> products
-            </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {currentProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
