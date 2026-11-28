@@ -1,7 +1,11 @@
 import { FaTimes } from "react-icons/fa";
 
 const fieldClassName =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500";
+  "w-full rounded-lg border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2";
+const standardFieldClassName =
+  `${fieldClassName} border-slate-300 focus:border-blue-500 focus:ring-blue-500`;
+const invalidFieldClassName =
+  "border-rose-500 focus:border-rose-500 focus:ring-rose-500";
 
 export default function PriceFilter({
   filters,
@@ -11,8 +15,28 @@ export default function PriceFilter({
   onRemoveFilter,
   onClearFilters,
 }) {
+  const availableBrands = [
+    ...new Set([...brands, ...(filters.brand ? [filters.brand] : [])]),
+  ].sort((a, b) => a.localeCompare(b));
+  const minPrice =
+    filters.minPrice === "" ? null : Number(filters.minPrice);
+  const maxPrice =
+    filters.maxPrice === "" ? null : Number(filters.maxPrice);
+  const hasInvalidPriceRange =
+    minPrice !== null &&
+    maxPrice !== null &&
+    Number.isFinite(minPrice) &&
+    Number.isFinite(maxPrice) &&
+    minPrice > maxPrice;
+  const priceFieldClassName = hasInvalidPriceRange
+    ? `${fieldClassName} ${invalidFieldClassName}`
+    : standardFieldClassName;
+
   return (
-    <section className="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <section
+      aria-label="Product filters"
+      className="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+    >
       {/* Filter */}
       <div className="mb-4 flex items-center justify-between">
         <h2 className="font-bold text-slate-900">Product Filters</h2>
@@ -48,8 +72,11 @@ export default function PriceFilter({
                   onChange("minPrice", event.target.value)
                 }
                 placeholder="No min"
-                aria-label="Minimum price"
-                className={`${fieldClassName} mt-1`}
+                aria-invalid={hasInvalidPriceRange}
+                aria-describedby={
+                  hasInvalidPriceRange ? "price-range-error" : undefined
+                }
+                className={`${priceFieldClassName} mt-1`}
               />
             </label>
 
@@ -64,11 +91,23 @@ export default function PriceFilter({
                   onChange("maxPrice", event.target.value)
                 }
                 placeholder="No max"
-                aria-label="Maximum price"
-                className={`${fieldClassName} mt-1`}
+                aria-invalid={hasInvalidPriceRange}
+                aria-describedby={
+                  hasInvalidPriceRange ? "price-range-error" : undefined
+                }
+                className={`${priceFieldClassName} mt-1`}
               />
             </label>
           </div>
+          {hasInvalidPriceRange && (
+            <p
+              id="price-range-error"
+              className="mt-2 text-xs text-rose-600"
+              role="alert"
+            >
+              Minimum price cannot be greater than maximum price.
+            </p>
+          )}
         </fieldset>
 
         {/* Minimum rating filter */}
@@ -79,7 +118,7 @@ export default function PriceFilter({
             onChange={(event) =>
               onChange("minRating", event.target.value)
             }
-            className={`${fieldClassName} mt-1 font-normal`}
+            className={`${standardFieldClassName} mt-1 font-normal`}
           >
             <option value="">Any rating</option>
             <option value="4">4 stars and up</option>
@@ -95,12 +134,12 @@ export default function PriceFilter({
           <select
             value={filters.brand}
             onChange={(event) => onChange("brand", event.target.value)}
-            className={`${fieldClassName} mt-1 font-normal`}
+            className={`${standardFieldClassName} mt-1 font-normal`}
           >
             <option value="">All brands</option>
 
             {/* Generate brand */}
-            {brands.map((brand) => (
+            {availableBrands.map((brand) => (
               <option key={brand} value={brand}>
                 {brand}
               </option>
@@ -116,7 +155,7 @@ export default function PriceFilter({
             onChange={(event) =>
               onChange("availability", event.target.value)
             }
-            className={`${fieldClassName} mt-1 font-normal`}
+            className={`${standardFieldClassName} mt-1 font-normal`}
           >
             <option value="all">All products</option>
             <option value="in-stock">In stock</option>

@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { FaExclamationCircle, FaRedo, FaSearchMinus } from "react-icons/fa";
 import {
   getProducts,
-  searchProducts,
+  searchProductsByCategories,
   getCategories,
   getProductsByCategory,
 } from "../services/productService";
@@ -63,7 +63,14 @@ export default function Products() {
     try {
       let data;
       if (debouncedQuery) {
-        data = await searchProducts(debouncedQuery);
+        const categorySlugs =
+          selectedCategory === "all"
+            ? categories.map((category) => category.slug)
+            : [selectedCategory];
+        data = await searchProductsByCategories(
+          debouncedQuery,
+          categorySlugs
+        );
       } else if (selectedCategory !== "all") {
         data = await getProductsByCategory(selectedCategory);
       } else {
@@ -75,7 +82,7 @@ export default function Products() {
     } finally {
       setLoading(false);
     }
-  }, [debouncedQuery, selectedCategory]);
+  }, [debouncedQuery, selectedCategory, categories]); 
 
   useEffect(() => {
     fetchProductList();

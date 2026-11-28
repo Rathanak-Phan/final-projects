@@ -69,3 +69,41 @@ export async function getProductById(id) {
 
   return response.json();
 }
+
+export async function searchProductsByCategories(query, categorySlugs) {
+  const q = query.trim().toLowerCase();
+  if (!q || !categorySlugs.length) {
+    return { products: [] };
+  }
+
+  const results = await Promise.all(
+    categorySlugs.map((slug) => getProductsByCategory(slug))
+  );
+
+  // Deduplicate by product id in case a product appears in multiple lists
+  const uniqueMap = new Map();
+  for (const res of results) {
+    for (const item of res.products || []) {
+      uniqueMap.set(item.id, item);
+    }
+  }
+
+  const filtered = Array.from(uniqueMap.values()).filter((product) => {
+    const title = product.title?.toLowerCase() || "";
+    const description = product.description?.toLowerCase() || "";
+    const category = product.category?.toLowerCase() || "";
+    return title.includes(q) || description.includes(q) || category.includes(q);
+  });
+
+  const getMatchPriority = (product) => {
+    const title = product.title?.toLowerCase() || "";
+    if (title.startsWith(q)) return 0;
+    if (title.includes(q)) return 1;
+    if (product.category?.toLowerCase().includes(q)) return 2;
+    return 3;
+  };
+
+  filtered.sort((a, b) => getMatchPriority(a) - getMatchPriority(b));
+
+  return { products: filtered };
+}
